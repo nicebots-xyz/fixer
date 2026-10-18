@@ -45,6 +45,9 @@ jobs:
     needs: fix
     if: needs.fix.outputs.changed == 'true'
     uses: nicebots-xyz/fixer/.github/workflows/push.yaml@<sha> # vX.Y.Z
+    secrets:
+      FIXER_APP_CLIENT_ID: ${{ secrets.FIXER_APP_CLIENT_ID }}
+      FIXER_APP_PRIVATE_KEY: ${{ secrets.FIXER_APP_PRIVATE_KEY }}
 ```
 
 Fix commands must not fail the job when something is left to fix by hand (hence `--exit-zero`): the push job only
@@ -64,9 +67,9 @@ runs when the fix job succeeds.
 1. Create a GitHub App for the organization: no webhook, repository permission **Contents: Read and write** only.
    Install it on the repositories that use fixer.
 2. In each repository that uses fixer, create a `fixer` environment with the secrets `FIXER_APP_CLIENT_ID` and
-   `FIXER_APP_PRIVATE_KEY`. Only the push job runs in that environment (without creating deployments), so the
-   caller doesn't pass any secrets. Passing them explicitly with `secrets:` also works, e.g. from repository
-   secrets.
+   `FIXER_APP_PRIVATE_KEY`. Only the push job runs in that environment (without creating deployments). The caller
+   still has to pass both secrets by name, as in the example above: GitHub resolves a secret the caller doesn't pass
+   to an empty string, even when it exists in the environment. The environment's value is the one the push job gets.
 3. While this repository is private, allow other repositories to use it: *Settings → Actions → General → Access →
    Accessible from repositories in the organization*. Public repositories can only use it once it is public.
 4. With Renovate, add the app's commit email to `gitIgnoredAuthors`, so a fix commit does not stop Renovate from

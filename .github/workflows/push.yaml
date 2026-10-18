@@ -18,12 +18,14 @@ on:
         type: string
         default: fixer
     secrets:
+      # The caller must pass both, even when they only exist in `environment`: a secret the caller doesn't pass
+      # resolves to an empty string. A secret of `environment` takes precedence over the value passed.
       FIXER_APP_CLIENT_ID:
-        description: Client ID of the fixer GitHub App. Not needed when set as a secret of `environment`.
-        required: false
+        description: Client ID of the fixer GitHub App.
+        required: true
       FIXER_APP_PRIVATE_KEY:
-        description: Private key of the fixer GitHub App. Not needed when set as a secret of `environment`.
-        required: false
+        description: Private key of the fixer GitHub App.
+        required: true
 
 permissions:
   contents: read

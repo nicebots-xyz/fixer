@@ -13,17 +13,13 @@ on:
         description: Message of the fix commit.
         type: string
         default: "style: Apply automated fixes"
-      environment:
-        description: Environment holding the app secrets. Created on first use if it does not exist.
-        type: string
-        default: fixer
     secrets:
       FIXER_APP_CLIENT_ID:
-        description: Client ID of the fixer GitHub App. Not needed when set as a secret of `environment`.
-        required: false
+        description: Client ID of the fixer GitHub App.
+        required: true
       FIXER_APP_PRIVATE_KEY:
-        description: Private key of the fixer GitHub App. Not needed when set as a secret of `environment`.
-        required: false
+        description: Private key of the fixer GitHub App.
+        required: true
 
 permissions:
   contents: read
@@ -34,9 +30,6 @@ jobs:
     # The app token can only push to branches of this repository, never to forks.
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
-    environment:
-      name: ${{ inputs.environment }}
-      deployment: false
     steps:
       - name: Download patch
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2

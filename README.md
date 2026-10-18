@@ -60,17 +60,14 @@ runs when the fix job succeeds.
 | action | `artifact-name` | `fixer-patch` |
 | `push.yaml` | `artifact-name` | `fixer-patch` |
 | `push.yaml` | `commit-message` | `style: Apply automated fixes` |
-| `push.yaml` | `environment` | `fixer` |
 
 ## Setup
 
 1. Create a GitHub App for the organization: no webhook, repository permission **Contents: Read and write** only.
    Install it on the repositories that use fixer.
-2. Give the push job its client ID and private key, either:
-   - as organization secrets `FIXER_APP_CLIENT_ID` and `FIXER_APP_PRIVATE_KEY` limited to the selected repositories,
-     passed by the caller as in the example above (one place to rotate the key), or
-   - as secrets of the `fixer` environment in each repository. The push job runs in that environment (without
-     creating deployments), so the caller doesn't pass any secrets.
+2. Add the app's client ID and private key as repository secrets `FIXER_APP_CLIENT_ID` and `FIXER_APP_PRIVATE_KEY`
+   in each repository that uses fixer (organization and environment secrets need a paid plan for private
+   repositories). The caller passes them to the push workflow as in the example above; only that job sees them.
 3. While this repository is private, allow other repositories to use it: *Settings → Actions → General → Access →
    Accessible from repositories in the organization*. Public repositories can only use it once it is public.
 4. With Renovate, add the app's commit email to `gitIgnoredAuthors`, so a fix commit does not stop Renovate from

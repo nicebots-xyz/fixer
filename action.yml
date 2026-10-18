@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: MIT
+# Copyright: 2026 NiceBots.xyz
+name: Fixer collect
+description: >-
+  Collect the changes made by the fix commands that ran before this step into a patch artifact,
+  for the `push` reusable workflow to commit to the pull request.
+author: NiceBots.xyz
+
+inputs:
+  artifact-name:
+    description: Name of the patch artifact. Must match the `push` workflow's `artifact-name` input.
+    default: fixer-patch
+
+outputs:
+  changed:
+    description: '"true" when the fix commands changed files and a patch was uploaded, "false" otherwise.'
+    value: ${{ steps.diff.outputs.changed }}
+
+runs:
+  using: composite
+  steps:
+    - name: Diff fixes
+      id: diff
+      shell: bash
+      run: |
+        patch="$RUNNER_TEMP/fixer/fixer.patch"
+        mkdir -p "$(dirname "$patch")"
+        # Include new files created by the fix commands.
+        git add --all --intent-to-add
+        git diff --binary > "$patch"
+        if [ -s "$patch" ]; then
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Fixer found changes"
+            echo '```'
+            git diff --stat
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+        else
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Upload patch
+      if: steps.diff.outputs.changed == 'true'
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ runner.temp }}/fixer/fixer.patch
+        retention-days: 1
+        if-no-files-found: error
